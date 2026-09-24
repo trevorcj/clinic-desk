@@ -7,7 +7,7 @@
   --input: #f8f9fb;
 
   --text-primary: #181819;
-  --text-secondary: #5d6c7b;
+  --text-secondary: #71777c;
 
   --text-disabled: #c8c9ca;
 
@@ -61,6 +61,18 @@
 
   --font-sans: var(--font-matter) ui-sans-serif, system-ui, sans-serif;
   --font-matter: var(--font-matter), sans-serif;
+}
+
+@layer base {
+  h2 {
+    @apply text-3xl font-medium tracking-tight text-text-primary;
+  }
+}
+
+@layer utilities {
+  .bold-title {
+    @apply text-text-primary tracking-wider text-sm font-black uppercase;
+  }
 }
 
 body {
