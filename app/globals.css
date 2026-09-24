@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --input: #f8f9fb;
+
+  --text-primary: #181819;
+  --text-secondary: #5d6c7b;
+
+  --text-disabled: #c8c9ca;
+
+  --primary: #4b93ff;
+
+  --border: #65676b;
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+
+  color-scheme: light;
+}
+
+.dark {
+  --background: #181819;
+  --input: rgba(255, 255, 255, 0.12);
+
+  --text-primary: #fff;
+  --text-secondary: rgba(242, 247, 255, 0.53);
+
+  --text-disabled: #393939;
+
+  --primary: #4b93ff;
+
+  --border: rgba(255, 255, 255, 0.12);
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-input: var(--input);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+
+  --color-text-disabled: var(--text-disabled);
+
+  --color-primary: var(--primary);
+
+  --color-border: var(--border);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  --font-sans: var(--font-matter) ui-sans-serif, system-ui, sans-serif;
+  --font-matter: var(--font-matter), sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-matter);
+}
