@@ -43,6 +43,40 @@ function BookingConfirmation({
           </p>
         </div>
 
+        {booking.startsAt && (
+          <div className="mt-6 w-full p-4 rounded-lg bg-stone-50 border border-border/10 space-y-1.5">
+            <p className="text-text-primary">
+              <span className="underline">Clinic time (New York)</span>:{" "}
+              <span className="">
+                {new Intl.DateTimeFormat("en-US", {
+                  timeZone: "America/New_York",
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZoneName: "short",
+                }).format(new Date(booking.startsAt))}
+              </span>
+            </p>
+            <p className="">
+              <span className="underline">Your local time</span>:{" "}
+              <span className=" text-text-primary">
+                {new Intl.DateTimeFormat(undefined, {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZoneName: "short",
+                }).format(new Date(booking.startsAt))}
+              </span>
+            </p>
+          </div>
+        )}
+
         <div className="mt-8 w-full flex flex-col sm:flex-row gap-4">
           <Link
             href="/appointments"

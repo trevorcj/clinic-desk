@@ -29,6 +29,26 @@ function parseDateRobust(val: string): Date | null {
   return null;
 }
 
+export function getClinicTimeParts(date: Date) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  let hour = 0;
+  let minute = 0;
+  let weekday = "";
+  for (const p of parts) {
+    if (p.type === "hour") hour = parseInt(p.value, 10);
+    if (p.type === "minute") minute = parseInt(p.value, 10);
+    if (p.type === "weekday") weekday = p.value;
+  }
+  return { hour, minute, weekday };
+}
+
 export const patientDetailsSchema = z.object({
   firstName: z
     .string()
@@ -137,36 +157,34 @@ export const bookingFormSchema = z
             message: "Appointment time cannot be in the past",
           });
         }
-        const day = date.getDay();
-        if (day === 0 || day === 6) {
+        const { hour, minute, weekday } = getClinicTimeParts(date);
+        if (weekday === "Sat" || weekday === "Sun") {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["startsAt"],
-            message: "Appointments are only available Monday through Friday",
+            message: "Appointments are only available Monday through Friday (Clinic Eastern Time)",
           });
         }
-        const minutes = date.getMinutes();
-        if (minutes !== 0 && minutes !== 30) {
+        if (minute !== 0 && minute !== 30) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["startsAt"],
             message: "Appointments must be scheduled on 30-minute increments (:00 or :30)",
           });
         }
-        const hours = date.getHours();
-        if (hours < 9 || hours >= 17) {
+        if (hour < 9 || hour >= 17) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["startsAt"],
-            message: "Appointments must be between 9:00 AM and 5:00 PM",
+            message: "Appointments must be between 9:00 AM and 5:00 PM Eastern Time",
           });
         }
         const duration = data.visitType === "medication-management" ? 30 : 60;
-        if (duration === 60 && hours === 16 && minutes > 0) {
+        if (duration === 60 && hour === 16 && minute > 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["startsAt"],
-            message: "60-minute visits cannot start after 4:00 PM as the clinic closes at 5:00 PM",
+            message: "60-minute visits cannot start after 4:00 PM Eastern Time as the clinic closes at 5:00 PM",
           });
         }
       }

@@ -12,9 +12,7 @@ function Book() {
     <div>
       <Suspense
         fallback={
-          <div className="p-6 text-sm text-text-secondary">
-            Loading booking step...
-          </div>
+          <div className="p-6 text-sm text-text-secondary">Loading...</div>
         }>
         <BookingWizard />
       </Suspense>

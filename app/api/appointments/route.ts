@@ -6,33 +6,63 @@ import { Appointment, VisitType, MeetingMode } from "@/lib/types/appointment";
 export async function GET(req: NextRequest) {
   await simulateLatency();
 
+  const simulateFailure = req.headers.get("x-simulate-failure") === "1";
+  if (simulateFailure && Math.random() < 0.3) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Simulated server failure (500)",
+      },
+      { status: 500 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
   const search = searchParams.get("search")?.toLowerCase().trim();
   const providerId = searchParams.get("providerId");
-  const statusParam = searchParams.getAll("status");
+  const rawStatuses = searchParams.getAll("status");
+  const statusParam = rawStatuses.flatMap((s) => s.split(",")).filter(Boolean);
+  const visitType = searchParams.get("visitType");
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const sortBy = searchParams.get("sortBy") || "startsAt";
-  const sortOrder = searchParams.get("sortOrder") || "asc";
+  const sortOrder = searchParams.get("sortOrder") || "desc";
+  const all = searchParams.get("all") === "true";
 
   let filtered = [...store.appointments];
 
   if (search) {
-    filtered = filtered.filter(
-      (a) =>
+    filtered = filtered.filter((a) => {
+      const fullName = `${a.patient.firstName} ${a.patient.lastName}`.toLowerCase();
+      const email = a.patient.email.toLowerCase();
+      const phoneDigits = a.patient.phone.replace(/\D/g, "");
+      const searchDigits = search.replace(/\D/g, "");
+      const provider = store.providers.find((p) => p.id === a.providerId);
+      const providerName = provider ? provider.name.toLowerCase() : "";
+
+      return (
+        fullName.includes(search) ||
         a.patient.firstName.toLowerCase().includes(search) ||
         a.patient.lastName.toLowerCase().includes(search) ||
-        a.patient.email.toLowerCase().includes(search)
-    );
+        email.includes(search) ||
+        (searchDigits.length >= 3 && phoneDigits.includes(searchDigits)) ||
+        providerName.includes(search) ||
+        a.id.toLowerCase().includes(search)
+      );
+    });
   }
 
-  if (providerId) {
+  if (providerId && providerId !== "all") {
     filtered = filtered.filter((a) => a.providerId === providerId);
   }
 
-  if (statusParam.length > 0) {
+  if (visitType && visitType !== "all") {
+    filtered = filtered.filter((a) => a.visitType === visitType);
+  }
+
+  if (statusParam.length > 0 && !statusParam.includes("all")) {
     filtered = filtered.filter((a) => statusParam.includes(a.status));
   }
 
@@ -57,8 +87,26 @@ export async function GET(req: NextRequest) {
   });
 
   const total = filtered.length;
+
+  if (all) {
+    return NextResponse.json({
+      success: true,
+      message: "OK",
+      data: {
+        content: filtered,
+        pagination: {
+          page: 1,
+          pageSize: total,
+          total,
+          totalPages: 1,
+        },
+      },
+    });
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const startIndex = (page - 1) * pageSize;
+  const validPage = Math.min(Math.max(1, page), totalPages);
+  const startIndex = (validPage - 1) * pageSize;
   const paginatedContent = filtered.slice(startIndex, startIndex + pageSize);
 
   return NextResponse.json({
@@ -67,7 +115,7 @@ export async function GET(req: NextRequest) {
     data: {
       content: paginatedContent,
       pagination: {
-        page,
+        page: validPage,
         pageSize,
         total,
         totalPages,

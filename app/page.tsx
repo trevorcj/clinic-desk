@@ -37,11 +37,16 @@ export default function Home() {
           professionals are here to help.
         </p>
 
-        <div className="mt-8">
+        <div className="mt-8 flex gap-3 items-center wrap">
           <Link
             href="/book"
-            className="inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-white bg-primary hover:bg-primary/95 active:bg-primary/85 rounded-full transition-all duration-200 ">
+            className="inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-white bg-primary hover:bg-primary/95 active:bg-primary/85 rounded-full transition-all duration-200 whitespace-nowrap">
             Book appointment
+          </Link>
+          <Link
+            href="/appointments"
+            className="inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-text-primary bg-transparent rounded-full transition-all duration-200 whitespace-nowrap border border-border/30">
+            View Appointments
           </Link>
         </div>
       </section>

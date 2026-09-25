@@ -47,3 +47,15 @@ export interface ApiResponse<T> {
   data?: T;
   fieldErrors?: Record<string, string>;
 }
+
+export interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedPayload<T> {
+  content: T[];
+  pagination: PaginationMeta;
+}

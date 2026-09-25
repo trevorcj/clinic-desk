@@ -23,22 +23,33 @@ function ReviewStep({ submitError, onGoToStep }: ReviewStepProps) {
     formData.providerId ||
     "Not selected";
 
-  const formattedDate = formData.startsAt
-    ? (() => {
-        try {
-          return new Date(formData.startsAt).toLocaleString(undefined, {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        } catch {
-          return formData.startsAt;
-        }
-      })()
+  const startsAtDate = formData.startsAt ? new Date(formData.startsAt) : null;
+  const isDateValid = startsAtDate && !isNaN(startsAtDate.getTime());
+
+  const clinicDateFormatted = isDateValid
+    ? new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }).format(startsAtDate)
     : "Not selected";
+
+  const localDateFormatted = isDateValid
+    ? new Intl.DateTimeFormat(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }).format(startsAtDate)
+    : "";
 
   return (
     <section className="max-w-3xl mx-auto flex flex-col items-center justify-center">
@@ -102,7 +113,15 @@ function ReviewStep({ submitError, onGoToStep }: ReviewStepProps) {
               </p>
               <p className="capitalize">{formData.mode || "Not selected"}</p>
               <p>{providerDisplay}</p>
-              <p>{formattedDate}</p>
+              <div className="flex gap-2">
+                <p>{clinicDateFormatted}</p>
+                {localDateFormatted &&
+                  localDateFormatted !== clinicDateFormatted && (
+                    <p className="text-text-secondary">
+                      (Local time: {localDateFormatted})
+                    </p>
+                  )}
+              </div>
             </div>
           </div>
 
